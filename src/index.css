@@ -866,3 +866,15 @@ footer > div { display: flex; gap: 22px; margin-left: auto; font-size: 11px; }
   .menu-card { padding: 20px; }
 }
 
+
+.streetfood-card { margin-bottom: 28px; border-color: var(--wine); box-shadow: 9px 9px 0 var(--gold); }
+.streetfood-groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.streetfood-groups h4 { margin: 0 0 12px; color: var(--wine); font-family: 'Oswald', sans-serif; font-size: 20px; text-transform: uppercase; }
+.streetfood-groups ul { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.streetfood-groups li { display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.streetfood-groups li strong { color: var(--wine); font-family: 'Oswald', sans-serif; font-size: 16px; white-space: nowrap; }
+.streetfood-groups li.is-deal strong { padding: 2px 8px; color: #fff; border-radius: 999px; background: #18a84c; font-size: 13px; }
+
+@media (max-width: 980px) {
+  .streetfood-groups { grid-template-columns: 1fr; gap: 20px; }
+}
