@@ -1,5 +1,7 @@
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useBan } from './GyrosConsent'
+import OrderTracker from './OrderTracker'
 
 type OrderProfile = {
   name: string
@@ -12,7 +14,10 @@ type OrderProfile = {
   distanceLabel: string
 }
 
-const spiceLabels = ['Babapopsi', 'Enyhe', 'Közepes', 'Csípős', 'Nagyon csípős', 'Tűzoltót hívok']
+const spiceLabels = ['Csípős nélkül', 'Enyhe', 'Közepes', 'Csípős', 'Nagyon csípős', 'Tűzoltót hívok']
+// "Csípős nélkül" and "Enyhe" get the order rejected and the visitor banned.
+const minAllowedSpice = 2
+const banDelaySeconds = 3
 
 type OrderSummary = {
   customer: string
@@ -24,6 +29,23 @@ type OrderSummary = {
 function Order({ profile }: { profile?: OrderProfile }) {
   const [spice, setSpice] = useState(2)
   const [summary, setSummary] = useState<OrderSummary | null>(null)
+  const [isReady, setIsReady] = useState(false)
+  const [banCountdown, setBanCountdown] = useState<number | null>(null)
+  const ban = useBan()
+
+  useEffect(() => {
+    if (banCountdown === null) {
+      return
+    }
+
+    if (banCountdown <= 0) {
+      ban('spice')
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => setBanCountdown(banCountdown - 1), 1000)
+    return () => window.clearTimeout(timeoutId)
+  }, [ban, banCountdown])
 
   if (!profile) {
     return (
@@ -38,6 +60,12 @@ function Order({ profile }: { profile?: OrderProfile }) {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (spice < minAllowedSpice) {
+      setBanCountdown(banDelaySeconds)
+      return
+    }
+
     // Nothing is saved or sent anywhere: the order only exists on this screen.
     const data = new FormData(event.currentTarget)
     setSummary({
@@ -46,6 +74,7 @@ function Order({ profile }: { profile?: OrderProfile }) {
       spice: spiceLabels[spice],
       onion: data.get('onion') === 'on',
     })
+    setIsReady(false)
     window.scrollTo(0, 0)
   }
 
@@ -54,17 +83,22 @@ function Order({ profile }: { profile?: OrderProfile }) {
       <section className="listing order-section">
         <div className="order-done">
           <p className="kicker dark">RENDELÉS LEADVA</p>
-          <h2>A gyros már úton van…</h2>
-          <p className="order-maybe">…de lehet, hogy nem.</p>
-          <p>
-            Kedves {summary.customer}! {profile.name} megkapta a rendelésed
-            ({summary.form}, {summary.spice.toLowerCase()}, {summary.onion ? 'hagymával' : 'hagyma nélkül'}).
-            A gyros fiúk elfoglalt lurkók, úgyhogy ha nem érkezik meg, az sem a te hibád.
-          </p>
-          <div className="order-done-actions">
-            <a className="search-button" href="#fiuk">Vissza a gyros fiúkhoz</a>
-            <button type="button" className="consent-decline" onClick={() => setSummary(null)}>Még egyet kérek</button>
-          </div>
+          <h2>{isReady ? 'A gyros már úton van…' : `${profile.name} készíti a gyrosod`}</h2>
+          <OrderTracker onReady={() => setIsReady(true)} />
+          {isReady && (
+            <>
+              <p className="order-maybe">…de lehet, hogy nem.</p>
+              <p>
+                Kedves {summary.customer}! {profile.name} elkészítette a rendelésed
+                ({summary.form}, {summary.spice.toLowerCase()}, {summary.onion ? 'hagymával' : 'hagyma nélkül'}).
+                A gyros fiúk elfoglalt lurkók, úgyhogy ha nem érkezik meg, az sem a te hibád.
+              </p>
+              <div className="order-done-actions">
+                <a className="search-button" href="#fiuk">Vissza a gyros fiúkhoz</a>
+                <button type="button" className="consent-decline" onClick={() => setSummary(null)}>Még egyet kérek</button>
+              </div>
+            </>
+          )}
         </div>
       </section>
     )
@@ -163,6 +197,17 @@ function Order({ profile }: { profile?: OrderProfile }) {
           <small className="order-note">Semmit nem mentünk el, a rendelés csak ezen a képernyőn létezik.</small>
         </form>
       </div>
+
+      {banCountdown !== null && (
+        <div className="consent-backdrop">
+          <section className="consent-dialog reject-dialog" role="alertdialog" aria-modal="true" aria-labelledby="reject-title">
+            <span className="reject-emoji" aria-hidden="true">🙅‍♂️</span>
+            <h2 id="reject-title">Rendelés elutasítva</h2>
+            <p>{spiceLabels[spice]}? Ez itt nem gyros, ez sértés.</p>
+            <p className="reject-countdown">Kitiltás {Math.max(banCountdown, 0)} másodperc múlva…</p>
+          </section>
+        </div>
+      )}
     </section>
   )
 }

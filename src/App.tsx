@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Featured from './Featured'
 import GyrosConsent from './GyrosConsent'
 import Order from './Order'
+import PostGyros from './PostGyros'
 import SwipeDeck from './SwipeDeck'
 import Voting from './Voting'
 
@@ -59,14 +60,18 @@ const profiles: GyrosProfile[] = [
   },
 ]
 
+// {name} in a popup title is swapped for a random gyros boy every time the popup appears.
+const popupNames = ['Ádi', 'Zalán', 'Tanár Úr', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész']
+
 const viralPopups = [
-  { title: 'Ádi üzenetet küldött', text: '“jössz ma gyrosra?”', tone: 'hot' },
-  { title: 'Zalán képet küldött', text: '1 új szaftos melléklet', tone: 'photo' },
-  { title: 'Ádi aktív', text: 'most nézte meg a profilod', tone: 'online' },
+  { title: '{name} elhívott egy mysteryboxra', text: 'hogy mi van benne? csak a pita tudja', tone: 'mystery' },
+  { title: '{name} üzenetet küldött', text: '“jössz ma gyrosra?”', tone: 'hot' },
+  { title: '{name} képet küldött', text: '1 új szaftos melléklet', tone: 'photo' },
+  { title: '{name} aktív', text: 'most nézte meg a profilod', tone: 'online' },
   { title: 'Gyros riasztás', text: '2 fiú van a közeledben', tone: 'warning' },
   { title: 'Nem vírus', text: 'kattints ide egy extra szószért', tone: 'danger' },
-  { title: 'Zalán rád nézett', text: 'a kép még mindig tölt...', tone: 'photo' },
-  { title: 'Ádi gépel...', text: 'nagyon szaftos választ ír', tone: 'online' },
+  { title: '{name} rád nézett', text: 'a kép még mindig tölt...', tone: 'photo' },
+  { title: '{name} gépel...', text: 'nagyon szaftos választ ír', tone: 'online' },
   { title: 'Akció lejár', text: '00:13 másodperc és kihűl', tone: 'hot' },
   { title: 'Engedélyezd a helyzeted', text: 'hogy a gyros találjon meg téged', tone: 'warning' },
 ]
@@ -74,16 +79,39 @@ const viralPopups = [
 const maxVisiblePopups = 3
 const centerPopupCheckMs = 9000
 const centerPopupChance = 0.5
+// Chance that a centre popup shows up three times bigger than usual.
+const hugePopupChance = 0.15
 
-function getPopupWindow(startIndex: number) {
-  return Array.from(
-    { length: maxVisiblePopups },
-    (_, offset) => (startIndex + offset) % viralPopups.length,
-  )
+function randomPopupName() {
+  return popupNames[Math.floor(Math.random() * popupNames.length)]
+}
+
+// Each corner popup appearance gets a random name once and keeps it while
+// it is on screen; the next round of the rotation draws a new one.
+const appearanceNames = new Map<number, string>()
+
+function popupNameFor(appearance: number) {
+  let name = appearanceNames.get(appearance)
+
+  if (!name) {
+    name = randomPopupName()
+    appearanceNames.set(appearance, name)
+  }
+
+  return name
+}
+
+function fillPopupName(title: string, name: string) {
+  return title.replace('{name}', name)
+}
+
+// Each corner popup appearance has its own number: tick + its slot.
+function getPopupWindow(tick: number) {
+  return Array.from({ length: maxVisiblePopups }, (_, offset) => tick + offset)
 }
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
-type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order'
+type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order' | 'post'
 
 const orderHashPrefix = '#rendeles/'
 
@@ -96,9 +124,14 @@ function getTabFromHash(hash: string): Tab {
     '#swipe': 'swipe',
     '#szavazas': 'vote',
     '#kiemelt': 'featured',
+    '#feladas': 'post',
   }
 
   return tabs[hash] ?? 'home'
+}
+
+function openPostPage() {
+  window.location.hash = 'feladas'
 }
 
 function openOrder(profileId: string) {
@@ -177,9 +210,15 @@ function Site() {
   const [viewerLocation, setViewerLocation] = useState<Coordinates>(fallbackLocation)
   const [locationLabel, setLocationLabel] = useState('Balatonszemes')
   const [locationStatus, setLocationStatus] = useState('alapértelmezett hely')
-  const [popupStartIndex, setPopupStartIndex] = useState(0)
+  const [popupTick, setPopupTick] = useState(0)
   const [dismissedPopups, setDismissedPopups] = useState<number[]>([])
-  const [centerPopupIndex, setCenterPopupIndex] = useState<number | null>(null)
+  const [centerPopup, setCenterPopup] = useState<{
+    index: number
+    name: string
+    x: number
+    y: number
+    huge: boolean
+  } | null>(null)
   const [hash, setHash] = useState(() => window.location.hash)
   const activeTab = getTabFromHash(hash)
 
@@ -229,24 +268,30 @@ function Site() {
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setPopupStartIndex((index) => (index + 1) % viralPopups.length)
+      setPopupTick((tick) => tick + 1)
     }, 4200)
 
     return () => window.clearInterval(intervalId)
   }, [])
 
   // A closed corner popup stays closed while it would still be on screen,
-  // and comes back on the next round of the rotation.
+  // and comes back (with a new name) on the next round of the rotation.
   useEffect(() => {
-    const popupWindow = getPopupWindow(popupStartIndex)
-    setDismissedPopups((indexes) => indexes.filter((index) => popupWindow.includes(index)))
-  }, [popupStartIndex])
+    setDismissedPopups((appearances) => appearances.filter((appearance) => appearance >= popupTick))
+  }, [popupTick])
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       if (Math.random() < centerPopupChance) {
-        setCenterPopupIndex(
-          (current) => current ?? Math.floor(Math.random() * viralPopups.length),
+        setCenterPopup(
+          (current) =>
+            current ?? {
+              index: Math.floor(Math.random() * viralPopups.length),
+              name: randomPopupName(),
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              huge: Math.random() < hugePopupChance,
+            },
         )
       }
     }, centerPopupCheckMs)
@@ -281,13 +326,18 @@ function Site() {
 
   const visiblePopups = useMemo(
     () =>
-      getPopupWindow(popupStartIndex)
-        .filter((popupIndex) => !dismissedPopups.includes(popupIndex))
-        .map((popupIndex) => ({
-          ...viralPopups[popupIndex],
-          popupIndex,
-        })),
-    [dismissedPopups, popupStartIndex],
+      getPopupWindow(popupTick)
+        .filter((appearance) => !dismissedPopups.includes(appearance))
+        .map((appearance) => {
+          const popup = viralPopups[appearance % viralPopups.length]
+
+          return {
+            ...popup,
+            title: fillPopupName(popup.title, popupNameFor(appearance)),
+            appearance,
+          }
+        }),
+    [dismissedPopups, popupTick],
   )
 
   return (
@@ -306,7 +356,7 @@ function Site() {
           </nav>
           <div className="account">
             <button className="ghost-button">Belépés</button>
-            <button className="add-button"><span>+</span> Gyros feladása</button>
+            <button type="button" className="add-button" onClick={openPostPage}><span>+</span> Gyros feladása</button>
           </div>
         </div>
       </header>
@@ -322,6 +372,10 @@ function Site() {
       ) : activeTab === 'featured' ? (
         <main>
           <Featured profiles={enrichedProfiles} onOrder={openOrder} />
+        </main>
+      ) : activeTab === 'post' ? (
+        <main>
+          <PostGyros />
         </main>
       ) : activeTab === 'order' ? (
         <main>
@@ -454,7 +508,7 @@ function Site() {
             <h2>Mutasd meg, mid van.</h2>
             <p>A hirdetés feladása gyorsabb, mint elfogyasztani egy pitát.</p>
           </div>
-          <button>Ingyenes hirdetés feladása <span>→</span></button>
+          <button type="button" onClick={openPostPage}>Ingyenes hirdetés feladása <span>→</span></button>
         </section>
       </main>
       )}
@@ -464,12 +518,12 @@ function Site() {
           <div
             className={`virus-popup ${popup.tone}`}
             style={{ '--delay': `${index * 0.18}s`, '--shift': `${index * 18}px` } as CSSProperties}
-            key={`${popup.title}-${popup.popupIndex}`}
+            key={popup.appearance}
           >
             <button
               type="button"
               aria-label="Bezárás"
-              onClick={() => setDismissedPopups((indexes) => [...indexes, popup.popupIndex])}
+              onClick={() => setDismissedPopups((appearances) => [...appearances, popup.appearance])}
             >
               ×
             </button>
@@ -479,12 +533,22 @@ function Site() {
         ))}
       </aside>
 
-      {centerPopupIndex !== null && (
-        <div className="virus-center" key={centerPopupIndex}>
-          <div className={`virus-popup is-center ${viralPopups[centerPopupIndex].tone}`} role="alert">
-            <button type="button" aria-label="Bezárás" onClick={() => setCenterPopupIndex(null)}>×</button>
-            <strong>{viralPopups[centerPopupIndex].title}</strong>
-            <span>{viralPopups[centerPopupIndex].text}</span>
+      {centerPopup && (
+        <div className="virus-center">
+          {/* x/y are percentages; the matching translate keeps the popup fully on screen. */}
+          <div
+            className={`virus-center-spot ${centerPopup.huge ? 'is-huge' : ''}`}
+            style={{
+              left: `${centerPopup.x}%`,
+              top: `${centerPopup.y}%`,
+              transform: `translate(-${centerPopup.x}%, -${centerPopup.y}%)`,
+            }}
+          >
+            <div className={`virus-popup is-center ${viralPopups[centerPopup.index].tone}`} role="alert">
+              <button type="button" aria-label="Bezárás" onClick={() => setCenterPopup(null)}>×</button>
+              <strong>{fillPopupName(viralPopups[centerPopup.index].title, centerPopup.name)}</strong>
+              <span>{viralPopups[centerPopup.index].text}</span>
+            </div>
           </div>
         </div>
       )}

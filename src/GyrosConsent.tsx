@@ -1,7 +1,28 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 type Consent = 'pending' | 'accepted' | 'declined'
+type BanReason = 'consent' | 'spice'
+
+const BanContext = createContext<(reason: BanReason) => void>(() => {})
+
+// Lets any page send the visitor to the ban page.
+export function useBan() {
+  return useContext(BanContext)
+}
+
+const banCopy: Record<BanReason, { kicker: string; text: string; retry: string }> = {
+  consent: {
+    kicker: 'HOZZÁFÉRÉS MEGTAGADVA',
+    text: 'Aki nem fogadja el a gyrosokat, annak itt nincs helye. A pita kihűlt, a szósz megalvadt, a gyros fiúk csalódottak.',
+    retry: 'Meggondoltam magam, elfogadom a gyrosokat',
+  },
+  spice: {
+    kicker: 'CSÍPŐSSÉGI SZABÁLYSÉRTÉS',
+    text: 'Csípős nélkül vagy enyhén? Itt nem. A szakács sírva fakadt, a pita összecsuklott, a gyros fiúk szégyenükben elbújtak a hűtőben.',
+    retry: 'Meggondoltam magam, kérek csípőset',
+  },
+}
 
 const storageKey = 'gyros-consent'
 
@@ -24,11 +45,17 @@ function saveConsent(value: Consent) {
 
 function GyrosConsent({ children }: { children: ReactNode }) {
   const [consent, setConsent] = useState<Consent>(readConsent)
+  const [banReason, setBanReason] = useState<BanReason>('consent')
 
   function choose(value: Consent) {
     saveConsent(value)
     setConsent(value)
     window.scrollTo(0, 0)
+  }
+
+  function ban(reason: BanReason) {
+    setBanReason(reason)
+    choose('declined')
   }
 
   useEffect(() => {
@@ -45,14 +72,11 @@ function GyrosConsent({ children }: { children: ReactNode }) {
           <a className="brand" href="#" aria-label="Gyrosszfiuk főoldal">
             gyrosszfiuk<span>.hu</span>
           </a>
-          <p className="kicker">HOZZÁFÉRÉS MEGTAGADVA</p>
+          <p className="kicker">{banCopy[banReason].kicker}</p>
           <h1 id="banned-title">Ki vagy tiltva</h1>
-          <p>
-            Aki nem fogadja el a gyrosokat, annak itt nincs helye. A pita kihűlt,
-            a szósz megalvadt, a gyros fiúk csalódottak.
-          </p>
+          <p>{banCopy[banReason].text}</p>
           <button type="button" className="add-button banned-retry" onClick={() => choose('accepted')}>
-            Meggondoltam magam, elfogadom a gyrosokat
+            {banCopy[banReason].retry}
           </button>
         </section>
       </main>
@@ -60,7 +84,7 @@ function GyrosConsent({ children }: { children: ReactNode }) {
   }
 
   return (
-    <>
+    <BanContext.Provider value={ban}>
       {children}
       {consent === 'pending' && (
         <div className="consent-backdrop">
@@ -93,7 +117,7 @@ function GyrosConsent({ children }: { children: ReactNode }) {
           </section>
         </div>
       )}
-    </>
+    </BanContext.Provider>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 type Candidate = {
   id: string
@@ -73,7 +73,6 @@ const candidates: Candidate[] = [
 
 const votedKey = 'gyros-vote'
 const localCountsKey = 'gyros-vote-counts'
-const hasFirebase = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID)
 
 function readStorage(key: string) {
   try {
@@ -100,70 +99,20 @@ function readLocalCounts(): VoteCounts {
 }
 
 function Voting() {
-  const [counts, setCounts] = useState<VoteCounts>(hasFirebase ? {} : readLocalCounts)
+  const [counts, setCounts] = useState<VoteCounts>(readLocalCounts)
   const [votedFor, setVotedFor] = useState(() => readStorage(votedKey))
-  const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!hasFirebase) {
-      return
-    }
-
-    let unsubscribe = () => {}
-    let cancelled = false
-
-    Promise.all([import('firebase/firestore'), import('./lib/firebase')]).then(
-      ([{ collection, onSnapshot }, { db }]) => {
-        if (cancelled) {
-          return
-        }
-
-        unsubscribe = onSnapshot(
-          collection(db, 'votes'),
-          (snapshot) => {
-            const nextCounts: VoteCounts = {}
-            snapshot.forEach((doc) => {
-              nextCounts[doc.id] = Number(doc.data().count) || 0
-            })
-            setCounts(nextCounts)
-          },
-          () => setError('A szavazatok most nem töltenek be, a gyros szerver épp forog.'),
-        )
-      },
-    )
-
-    return () => {
-      cancelled = true
-      unsubscribe()
-    }
-  }, [])
-
-  async function vote(candidateId: string) {
+  // Votes are only counted in this browser; nothing is sent anywhere.
+  function vote(candidateId: string) {
     if (votedFor) {
       return
     }
 
+    const nextCounts = { ...counts, [candidateId]: (counts[candidateId] ?? 0) + 1 }
     setVotedFor(candidateId)
+    setCounts(nextCounts)
     writeStorage(votedKey, candidateId)
-
-    if (!hasFirebase) {
-      const nextCounts = { ...counts, [candidateId]: (counts[candidateId] ?? 0) + 1 }
-      setCounts(nextCounts)
-      writeStorage(localCountsKey, JSON.stringify(nextCounts))
-      return
-    }
-
-    try {
-      const [{ doc, increment, setDoc }, { db }] = await Promise.all([
-        import('firebase/firestore'),
-        import('./lib/firebase'),
-      ])
-      await setDoc(doc(db, 'votes', candidateId), { count: increment(1) }, { merge: true })
-    } catch {
-      setError('A szavazatod nem ment át. Próbáld újra később.')
-      setVotedFor(null)
-      writeStorage(votedKey, '')
-    }
+    writeStorage(localCountsKey, JSON.stringify(nextCounts))
   }
 
   const totalVotes = candidates.reduce((sum, candidate) => sum + (counts[candidate.id] ?? 0), 0)
@@ -178,8 +127,6 @@ function Voting() {
         </div>
         <p><strong>{totalVotes}</strong> leadott szavazat · egy böngészőből egy szavazat</p>
       </div>
-
-      {error && <p className="vote-error">{error}</p>}
 
       <div className="vote-grid">
         {candidates.map((candidate) => {
@@ -226,12 +173,6 @@ function Voting() {
           )
         })}
       </div>
-
-      {!hasFirebase && (
-        <p className="vote-note">
-          Nincs Firebase beállítva, ezért a szavazatok most csak ebben a böngészőben számolódnak.
-        </p>
-      )}
     </section>
   )
 }
