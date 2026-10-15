@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import GyrosConsent from './GyrosConsent'
 import SwipeDeck from './SwipeDeck'
+import Voting from './Voting'
 
 type Coordinates = {
   lat: number
@@ -67,8 +69,14 @@ const viralPopups = [
 const maxVisiblePopups = 3
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
-function isSwipeHash() {
-  return window.location.hash === '#swipe'
+type Tab = 'home' | 'swipe' | 'vote'
+
+function getTabFromHash(): Tab {
+  if (window.location.hash === '#swipe') {
+    return 'swipe'
+  }
+
+  return window.location.hash === '#szavazas' ? 'vote' : 'home'
 }
 
 function toRadians(value: number) {
@@ -129,6 +137,14 @@ function App() {
     return <UnderConstruction />
   }
 
+  return (
+    <GyrosConsent>
+      <Site />
+    </GyrosConsent>
+  )
+}
+
+function Site() {
   const [city, setCity] = useState('Minden város')
   const [query, setQuery] = useState('')
   const [onlyOpen, setOnlyOpen] = useState(false)
@@ -136,14 +152,14 @@ function App() {
   const [locationLabel, setLocationLabel] = useState('Balatonszemes')
   const [locationStatus, setLocationStatus] = useState('alapértelmezett hely')
   const [popupStartIndex, setPopupStartIndex] = useState(0)
-  const [showSwipe, setShowSwipe] = useState(isSwipeHash)
+  const [activeTab, setActiveTab] = useState(getTabFromHash)
 
   useEffect(() => {
     function onHashChange() {
-      const nextShowSwipe = isSwipeHash()
-      setShowSwipe(nextShowSwipe)
+      const nextTab = getTabFromHash()
+      setActiveTab(nextTab)
 
-      if (nextShowSwipe) {
+      if (nextTab !== 'home') {
         window.scrollTo(0, 0)
       }
     }
@@ -237,9 +253,10 @@ function App() {
             gyrosszfiuk<span>.hu</span>
           </a>
           <nav aria-label="Fő navigáció">
-            <a className={showSwipe ? '' : 'active'} href="#fiuk">Gyros fiúk</a>
+            <a className={activeTab === 'home' ? 'active' : ''} href="#fiuk">Gyros fiúk</a>
             <a href="#kiemelt">Kiemeltek</a>
-            <a className={`nav-swipe ${showSwipe ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
+            <a className={`nav-swipe ${activeTab === 'swipe' ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
+            <a className={`nav-swipe ${activeTab === 'vote' ? 'active' : ''}`} href="#szavazas">Szavazás 🗳️</a>
             <a href="#etterem">Éttermek</a>
           </nav>
           <div className="account">
@@ -249,9 +266,13 @@ function App() {
         </div>
       </header>
 
-      {showSwipe ? (
+      {activeTab === 'swipe' ? (
         <main>
           <SwipeDeck profiles={enrichedProfiles} />
+        </main>
+      ) : activeTab === 'vote' ? (
+        <main>
+          <Voting />
         </main>
       ) : (
       <main>

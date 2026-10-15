@@ -124,10 +124,10 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
     <section className="listing swipe-section" id="swipe">
       <div className="section-heading">
         <div>
-          <p className="kicker dark">GYROS TINDER</p>
-          <h2>Húzd jobbra, ha kell</h2>
+          <p className="kicker dark">GYROS FIÚ KERESŐ</p>
+          <h2>Húzd jobbra, ha tőle kérnéd a gyroszt</h2>
         </div>
-        <p><strong>{liked.length}</strong> szaftos match eddig</p>
+        <p><strong>{liked.length}</strong> gyros kiválasztva eddig</p>
       </div>
 
       <div className="swipe-stage">
@@ -149,8 +149,8 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerCancel}
             >
-              <span className="swipe-stamp like" style={{ opacity: likeOpacity }}>KELL</span>
-              <span className="swipe-stamp nope" style={{ opacity: nopeOpacity }}>NEM KELL</span>
+              <span className="swipe-stamp like" style={{ opacity: likeOpacity }}>KÉREM</span>
+              <span className="swipe-stamp nope" style={{ opacity: nopeOpacity }}>NEM KÉREM</span>
             </SwipeCard>
           </div>
         ) : (
@@ -158,8 +158,8 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
             <strong>Elfogytak a gyros fiúk.</strong>
             <span>
               {liked.length > 0
-                ? `Akik tetszettek: ${liked.join(', ')}`
-                : 'Senki nem tetszett? Ennyire válogatós vagy?'}
+                ? `Akiktől kérnéd a gyrost: ${liked.join(', ')}`
+                : 'Senkitől nem kérnél gyrost? Ennyire válogatós vagy?'}
             </span>
             <button type="button" className="search-button" onClick={restart}>Újrakezdem</button>
           </div>
@@ -167,15 +167,15 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
 
         {lastLiked && (
           <div className="swipe-match" key={liked.length} aria-live="polite">
-            It's a match! <span>{lastLiked} is rád vár</span>
+            Gyros rendelve! <span>{lastLiked} már tekeri a pitát</span>
           </div>
         )}
       </div>
 
       {current && (
         <div className="swipe-actions">
-          <button type="button" className="swipe-button nope" aria-label="Nem kell" onClick={() => decide('nope')}>✕</button>
-          <button type="button" className="swipe-button like" aria-label="Kell" onClick={() => decide('like')}>♥</button>
+          <button type="button" className="swipe-button nope" aria-label="Nem kérek tőle gyrost" onClick={() => decide('nope')}>✕</button>
+          <button type="button" className="swipe-button like" aria-label="Tőle kérem a gyrost" onClick={() => decide('like')}>♥</button>
         </div>
       )}
       <p className="swipe-hint">Húzd a kártyát, vagy használd a ← → nyilakat.</p>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#ffe3a1"/>
+  <g fill="#fff" opacity=".35">
+    <circle cx="40" cy="50" r="14"/><circle cx="350" cy="70" r="18"/>
+    <circle cx="60" cy="330" r="20"/><circle cx="355" cy="340" r="12"/>
+  </g>
+  <!-- haj -->
+  <circle cx="105" cy="185" r="58" fill="#e30038"/>
+  <circle cx="295" cy="185" r="58" fill="#e30038"/>
+  <circle cx="85" cy="235" r="40" fill="#e30038"/>
+  <circle cx="315" cy="235" r="40" fill="#e30038"/>
+  <!-- kalap -->
+  <path d="M150 105 L200 20 L250 105 Z" fill="#2457ff"/>
+  <circle cx="200" cy="20" r="14" fill="#e2a52d"/>
+  <circle cx="190" cy="70" r="7" fill="#fff"/><circle cx="212" cy="88" r="7" fill="#fff"/>
+  <!-- arc -->
+  <ellipse cx="200" cy="215" rx="105" ry="115" fill="#fff4ea" stroke="#2a1717" stroke-width="5"/>
+  <!-- szemek -->
+  <path d="M140 170 l20 -24 l20 24 l-20 24 z" fill="#2457ff" opacity=".85"/>
+  <path d="M220 170 l20 -24 l20 24 l-20 24 z" fill="#2457ff" opacity=".85"/>
+  <circle cx="160" cy="172" r="10" fill="#2a1717"/>
+  <circle cx="240" cy="172" r="10" fill="#2a1717"/>
+  <circle cx="164" cy="168" r="3" fill="#fff"/><circle cx="244" cy="168" r="3" fill="#fff"/>
+  <!-- orr -->
+  <circle cx="200" cy="218" r="26" fill="#e30038"/>
+  <circle cx="191" cy="209" r="7" fill="#fff" opacity=".6"/>
+  <!-- száj -->
+  <path d="M135 255 Q200 330 265 255 Q200 290 135 255 Z" fill="#e30038" stroke="#2a1717" stroke-width="4"/>
+  <!-- csokornyakkendő -->
+  <path d="M200 335 L145 305 L145 365 Z M200 335 L255 305 L255 365 Z" fill="#18a84c" stroke="#2a1717" stroke-width="4"/>
+  <circle cx="200" cy="335" r="12" fill="#e2a52d" stroke="#2a1717" stroke-width="4"/>
+</svg>
