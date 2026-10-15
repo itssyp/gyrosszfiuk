@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import SwipeDeck from './SwipeDeck'
 
 type Coordinates = {
   lat: number
@@ -66,6 +67,10 @@ const viralPopups = [
 const maxVisiblePopups = 3
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
+function isSwipeHash() {
+  return window.location.hash === '#swipe'
+}
+
 function toRadians(value: number) {
   return (value * Math.PI) / 180
 }
@@ -131,6 +136,21 @@ function App() {
   const [locationLabel, setLocationLabel] = useState('Balatonszemes')
   const [locationStatus, setLocationStatus] = useState('alapértelmezett hely')
   const [popupStartIndex, setPopupStartIndex] = useState(0)
+  const [showSwipe, setShowSwipe] = useState(isSwipeHash)
+
+  useEffect(() => {
+    function onHashChange() {
+      const nextShowSwipe = isSwipeHash()
+      setShowSwipe(nextShowSwipe)
+
+      if (nextShowSwipe) {
+        window.scrollTo(0, 0)
+      }
+    }
+
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -217,8 +237,9 @@ function App() {
             gyrosszfiuk<span>.hu</span>
           </a>
           <nav aria-label="Fő navigáció">
-            <a className="active" href="#fiuk">Gyros fiúk</a>
+            <a className={showSwipe ? '' : 'active'} href="#fiuk">Gyros fiúk</a>
             <a href="#kiemelt">Kiemeltek</a>
+            <a className={`nav-swipe ${showSwipe ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
             <a href="#etterem">Éttermek</a>
           </nav>
           <div className="account">
@@ -228,6 +249,11 @@ function App() {
         </div>
       </header>
 
+      {showSwipe ? (
+        <main>
+          <SwipeDeck profiles={enrichedProfiles} />
+        </main>
+      ) : (
       <main>
         <section className="hero">
           <div className="hero-inner">
@@ -354,6 +380,7 @@ function App() {
           <button>Ingyenes hirdetés feladása <span>→</span></button>
         </section>
       </main>
+      )}
 
       <aside className="virus-popups" aria-label="Felugró értesítések">
         {visiblePopups.map((popup, index) => (
