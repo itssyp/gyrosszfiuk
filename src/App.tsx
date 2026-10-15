@@ -132,6 +132,14 @@ function getTabFromHash(hash: string): Tab {
   return tabs[hash] ?? 'home'
 }
 
+const navLinks: { tab: Tab; href: string; label: string }[] = [
+  { tab: 'home', href: '#fiuk', label: 'Gyros fiúk' },
+  { tab: 'featured', href: '#kiemelt', label: 'Kiemeltek' },
+  { tab: 'swipe', href: '#swipe', label: 'Swipe 🔥' },
+  { tab: 'vote', href: '#szavazas', label: 'Szavazás 🗳️' },
+  { tab: 'restaurant', href: '#etterem', label: 'Éttermek' },
+]
+
 function openPostPage() {
   window.location.hash = 'feladas'
 }
@@ -222,11 +230,13 @@ function Site() {
     huge: boolean
   } | null>(null)
   const [hash, setHash] = useState(() => window.location.hash)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const activeTab = getTabFromHash(hash)
 
   useEffect(() => {
     function onHashChange() {
       setHash(window.location.hash)
+      setIsMenuOpen(false)
 
       if (getTabFromHash(window.location.hash) !== 'home') {
         window.scrollTo(0, 0)
@@ -236,6 +246,21 @@ function Site() {
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isMenuOpen])
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -350,17 +375,48 @@ function Site() {
             gyrosszfiuk<span>.hu</span>
           </a>
           <nav aria-label="Fő navigáció">
-            <a className={activeTab === 'home' ? 'active' : ''} href="#fiuk">Gyros fiúk</a>
-            <a className={activeTab === 'featured' ? 'active' : ''} href="#kiemelt">Kiemeltek</a>
-            <a className={`nav-swipe ${activeTab === 'swipe' ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
-            <a className={`nav-swipe ${activeTab === 'vote' ? 'active' : ''}`} href="#szavazas">Szavazás 🗳️</a>
-            <a className={activeTab === 'restaurant' ? 'active' : ''} href="#etterem">Éttermek</a>
+            {navLinks.map((link) => (
+              <a className={activeTab === link.tab ? 'active' : ''} href={link.href} key={link.href}>{link.label}</a>
+            ))}
           </nav>
           <div className="account">
             <button className="ghost-button">Belépés</button>
             <button type="button" className="add-button" onClick={openPostPage}><span>+</span> Gyros feladása</button>
           </div>
+          <button
+            type="button"
+            className={`menu-toggle ${isMenuOpen ? 'is-open' : ''}`}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            <span aria-hidden="true">{isMenuOpen ? '✕' : '☰'}</span> Menü
+          </button>
         </div>
+        {isMenuOpen && (
+          <nav className="mobile-menu" id="mobile-menu" aria-label="Mobil menü">
+            {navLinks.map((link) => (
+              <a
+                className={activeTab === link.tab ? 'active' : ''}
+                href={link.href}
+                key={link.href}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+            <button
+              type="button"
+              className="add-button"
+              onClick={() => {
+                setIsMenuOpen(false)
+                openPostPage()
+              }}
+            >
+              <span>+</span> Gyros feladása
+            </button>
+          </nav>
+        )}
       </header>
 
       {activeTab === 'swipe' ? (

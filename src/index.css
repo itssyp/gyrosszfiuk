@@ -108,6 +108,43 @@ nav a:hover, nav a.active { color: #fff; }
 nav a.active::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; content: ''; background: var(--gold); }
 .account { display: flex; gap: 12px; margin-left: auto; }
 .account button { border-radius: 4px; padding: 10px 16px; font-size: 13px; font-weight: 700; }
+.menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 9px 14px;
+  color: var(--wine-dark);
+  border: 0;
+  border-radius: 4px;
+  background: var(--gold);
+  font-size: 14px;
+  font-weight: 800;
+}
+.menu-toggle span { width: 16px; font-size: 17px; line-height: 1; text-align: center; }
+.menu-toggle.is-open { color: #fff; background: rgb(255 255 255 / 14%); }
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 2px;
+  padding: 10px 16px 18px;
+  background: var(--wine-dark);
+  border-bottom: 3px solid var(--gold);
+  box-shadow: 0 18px 30px rgb(0 0 0 / 30%);
+  animation: menuDrop .18s ease-out;
+}
+.mobile-menu a { display: block; padding: 13px 4px; color: #d9bec1; border-bottom: 1px solid rgb(255 255 255 / 9%); font-size: 16px; font-weight: 700; }
+.mobile-menu a.active { color: #fff; box-shadow: inset 4px 0 0 var(--gold); padding-left: 14px; }
+.mobile-menu a.active::after { content: none; }
+.mobile-menu .add-button { margin-top: 12px; padding: 13px 16px; border-radius: 4px; font-size: 15px; font-weight: 800; }
+
+@keyframes menuDrop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .ghost-button { color: #fff; border: 1px solid rgb(255 255 255 / 35%); background: transparent; }
 .add-button { color: var(--wine-dark); border: 0; background: var(--gold); }
 .add-button span { margin-right: 5px; font-size: 17px; }
@@ -748,7 +785,8 @@ footer > div { display: flex; gap: 22px; margin-left: auto; font-size: 11px; }
 .banned-retry { margin-top: 28px; padding: 13px 18px; border-radius: 4px; font-weight: 700; }
 
 @media (max-width: 980px) {
-  nav a:not(.nav-swipe) { display: none; }
+  .topbar-inner nav, .account { display: none; }
+  .menu-toggle { display: inline-flex; }
   .profile-grid { grid-template-columns: repeat(2, 1fr); }
   .highlight-grid { grid-template-columns: repeat(2, 1fr); }
   .vote-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -766,7 +804,7 @@ footer > div { display: flex; gap: 22px; margin-left: auto; font-size: 11px; }
   .topbar-inner { height: 64px; gap: 16px; }
   .brand { font-size: 23px; }
   .ghost-button { display: none; }
-  .add-button { padding: 8px 10px !important; font-size: 11px !important; }
+  .account .add-button { padding: 8px 10px !important; font-size: 11px !important; }
   .hero-inner { min-height: 350px; padding: 48px 0 72px; }
   .hero h1 { font-size: 49px; }
   .search-panel { width: calc(100% - 28px); padding: 18px; }
