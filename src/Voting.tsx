@@ -18,7 +18,7 @@ const candidates: Candidate[] = [
   {
     id: 'tanar',
     name: 'Tanár Úr',
-    age: 21,
+    age: 40,
     image: '/jeloltek/tanar-ur.jpg',
     tags: ['késművész', 'lila szósz'],
     attributes: ['2x lock in', 'ex-étterem boss', 'mexikói hagymás', 'hajrá Újpest'],
