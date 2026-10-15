@@ -61,7 +61,9 @@ function Restaurant() {
           <h2>¿Y Que Bufue?</h2>
           <p>
             A gyros fiúk kedvenc büféje. Van gyros, smash burger, paquito, és minden,
-            ami mellé kell. Nyitva, amíg van jég.
+            ami mellé kell.
+            <br />
+            Nyitva ✅Vagyunk végig ☝😎
           </p>
         </div>
         <div className="restaurant-stamp" aria-hidden="true">
