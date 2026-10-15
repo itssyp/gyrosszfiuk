@@ -4,6 +4,7 @@ import Featured from './Featured'
 import GyrosConsent from './GyrosConsent'
 import Order from './Order'
 import PostGyros from './PostGyros'
+import Restaurant from './Restaurant'
 import SwipeDeck from './SwipeDeck'
 import Voting from './Voting'
 
@@ -111,7 +112,7 @@ function getPopupWindow(tick: number) {
 }
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
-type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order' | 'post'
+type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order' | 'post' | 'restaurant'
 
 const orderHashPrefix = '#rendeles/'
 
@@ -125,6 +126,7 @@ function getTabFromHash(hash: string): Tab {
     '#szavazas': 'vote',
     '#kiemelt': 'featured',
     '#feladas': 'post',
+    '#etterem': 'restaurant',
   }
 
   return tabs[hash] ?? 'home'
@@ -352,7 +354,7 @@ function Site() {
             <a className={activeTab === 'featured' ? 'active' : ''} href="#kiemelt">Kiemeltek</a>
             <a className={`nav-swipe ${activeTab === 'swipe' ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
             <a className={`nav-swipe ${activeTab === 'vote' ? 'active' : ''}`} href="#szavazas">Szavazás 🗳️</a>
-            <a href="#etterem">Éttermek</a>
+            <a className={activeTab === 'restaurant' ? 'active' : ''} href="#etterem">Éttermek</a>
           </nav>
           <div className="account">
             <button className="ghost-button">Belépés</button>
@@ -372,6 +374,10 @@ function Site() {
       ) : activeTab === 'featured' ? (
         <main>
           <Featured profiles={enrichedProfiles} onOrder={openOrder} />
+        </main>
+      ) : activeTab === 'restaurant' ? (
+        <main>
+          <Restaurant />
         </main>
       ) : activeTab === 'post' ? (
         <main>
@@ -487,7 +493,7 @@ function Site() {
                   <p className="closeness-copy">{profile.closeness}</p>
                   <div className="card-footer">
                     <small>Frissítve: {profile.fresh}</small>
-                    <button type="button" onClick={() => openOrder(profile.id)}>Megnézem <span>→</span></button>
+                    <button type="button" className="view-button" onClick={() => openOrder(profile.id)}>Megnézem <span>→</span></button>
                   </div>
                 </div>
               </article>
