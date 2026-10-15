@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import Featured from './Featured'
 import GyrosConsent from './GyrosConsent'
+import Order from './Order'
 import SwipeDeck from './SwipeDeck'
 import Voting from './Voting'
 
@@ -10,6 +12,7 @@ type Coordinates = {
 }
 
 type GyrosProfile = {
+  id: string
   name: string
   city: string
   district: string
@@ -29,6 +32,7 @@ const fallbackLocation: Coordinates = {
 
 const profiles: GyrosProfile[] = [
   {
+    id: 'adi',
     name: 'Ádi',
     city: 'Balatonszemes',
     district: '',
@@ -41,6 +45,7 @@ const profiles: GyrosProfile[] = [
     coordinates: { lat: 46.8102, lon: 17.7707 },
   },
   {
+    id: 'zalan',
     name: 'Zalán',
     city: 'Budapest',
     district: 'XI. kerület',
@@ -67,16 +72,37 @@ const viralPopups = [
 ]
 
 const maxVisiblePopups = 3
+const centerPopupCheckMs = 9000
+const centerPopupChance = 0.5
+
+function getPopupWindow(startIndex: number) {
+  return Array.from(
+    { length: maxVisiblePopups },
+    (_, offset) => (startIndex + offset) % viralPopups.length,
+  )
+}
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
-type Tab = 'home' | 'swipe' | 'vote'
+type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order'
 
-function getTabFromHash(): Tab {
-  if (window.location.hash === '#swipe') {
-    return 'swipe'
+const orderHashPrefix = '#rendeles/'
+
+function getTabFromHash(hash: string): Tab {
+  if (hash.startsWith(orderHashPrefix)) {
+    return 'order'
   }
 
-  return window.location.hash === '#szavazas' ? 'vote' : 'home'
+  const tabs: Record<string, Tab> = {
+    '#swipe': 'swipe',
+    '#szavazas': 'vote',
+    '#kiemelt': 'featured',
+  }
+
+  return tabs[hash] ?? 'home'
+}
+
+function openOrder(profileId: string) {
+  window.location.hash = `${orderHashPrefix}${profileId}`
 }
 
 function toRadians(value: number) {
@@ -152,14 +178,16 @@ function Site() {
   const [locationLabel, setLocationLabel] = useState('Balatonszemes')
   const [locationStatus, setLocationStatus] = useState('alapértelmezett hely')
   const [popupStartIndex, setPopupStartIndex] = useState(0)
-  const [activeTab, setActiveTab] = useState(getTabFromHash)
+  const [dismissedPopups, setDismissedPopups] = useState<number[]>([])
+  const [centerPopupIndex, setCenterPopupIndex] = useState<number | null>(null)
+  const [hash, setHash] = useState(() => window.location.hash)
+  const activeTab = getTabFromHash(hash)
 
   useEffect(() => {
     function onHashChange() {
-      const nextTab = getTabFromHash()
-      setActiveTab(nextTab)
+      setHash(window.location.hash)
 
-      if (nextTab !== 'home') {
+      if (getTabFromHash(window.location.hash) !== 'home') {
         window.scrollTo(0, 0)
       }
     }
@@ -207,6 +235,25 @@ function Site() {
     return () => window.clearInterval(intervalId)
   }, [])
 
+  // A closed corner popup stays closed while it would still be on screen,
+  // and comes back on the next round of the rotation.
+  useEffect(() => {
+    const popupWindow = getPopupWindow(popupStartIndex)
+    setDismissedPopups((indexes) => indexes.filter((index) => popupWindow.includes(index)))
+  }, [popupStartIndex])
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (Math.random() < centerPopupChance) {
+        setCenterPopupIndex(
+          (current) => current ?? Math.floor(Math.random() * viralPopups.length),
+        )
+      }
+    }, centerPopupCheckMs)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
   const enrichedProfiles = useMemo(
     () =>
       profiles.map((profile) => {
@@ -234,15 +281,13 @@ function Site() {
 
   const visiblePopups = useMemo(
     () =>
-      Array.from({ length: maxVisiblePopups }, (_, offset) => {
-        const popupIndex = (popupStartIndex + offset) % viralPopups.length
-
-        return {
+      getPopupWindow(popupStartIndex)
+        .filter((popupIndex) => !dismissedPopups.includes(popupIndex))
+        .map((popupIndex) => ({
           ...viralPopups[popupIndex],
           popupIndex,
-        }
-      }),
-    [popupStartIndex],
+        })),
+    [dismissedPopups, popupStartIndex],
   )
 
   return (
@@ -254,7 +299,7 @@ function Site() {
           </a>
           <nav aria-label="Fő navigáció">
             <a className={activeTab === 'home' ? 'active' : ''} href="#fiuk">Gyros fiúk</a>
-            <a href="#kiemelt">Kiemeltek</a>
+            <a className={activeTab === 'featured' ? 'active' : ''} href="#kiemelt">Kiemeltek</a>
             <a className={`nav-swipe ${activeTab === 'swipe' ? 'active' : ''}`} href="#swipe">Swipe 🔥</a>
             <a className={`nav-swipe ${activeTab === 'vote' ? 'active' : ''}`} href="#szavazas">Szavazás 🗳️</a>
             <a href="#etterem">Éttermek</a>
@@ -273,6 +318,17 @@ function Site() {
       ) : activeTab === 'vote' ? (
         <main>
           <Voting />
+        </main>
+      ) : activeTab === 'featured' ? (
+        <main>
+          <Featured profiles={enrichedProfiles} onOrder={openOrder} />
+        </main>
+      ) : activeTab === 'order' ? (
+        <main>
+          <Order
+            key={hash}
+            profile={enrichedProfiles.find((profile) => `${orderHashPrefix}${profile.id}` === hash)}
+          />
         </main>
       ) : (
       <main>
@@ -377,7 +433,7 @@ function Site() {
                   <p className="closeness-copy">{profile.closeness}</p>
                   <div className="card-footer">
                     <small>Frissítve: {profile.fresh}</small>
-                    <button>Megnézem <span>→</span></button>
+                    <button type="button" onClick={() => openOrder(profile.id)}>Megnézem <span>→</span></button>
                   </div>
                 </div>
               </article>
@@ -410,12 +466,28 @@ function Site() {
             style={{ '--delay': `${index * 0.18}s`, '--shift': `${index * 18}px` } as CSSProperties}
             key={`${popup.title}-${popup.popupIndex}`}
           >
-            <button aria-label="Bezárás">×</button>
+            <button
+              type="button"
+              aria-label="Bezárás"
+              onClick={() => setDismissedPopups((indexes) => [...indexes, popup.popupIndex])}
+            >
+              ×
+            </button>
             <strong>{popup.title}</strong>
             <span>{popup.text}</span>
           </div>
         ))}
       </aside>
+
+      {centerPopupIndex !== null && (
+        <div className="virus-center" key={centerPopupIndex}>
+          <div className={`virus-popup is-center ${viralPopups[centerPopupIndex].tone}`} role="alert">
+            <button type="button" aria-label="Bezárás" onClick={() => setCenterPopupIndex(null)}>×</button>
+            <strong>{viralPopups[centerPopupIndex].title}</strong>
+            <span>{viralPopups[centerPopupIndex].text}</span>
+          </div>
+        </div>
+      )}
 
       <footer>
         <a className="brand" href="#">gyrosszfiuk<span>.hu</span></a>
