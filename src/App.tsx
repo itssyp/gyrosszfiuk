@@ -82,6 +82,15 @@ const centerPopupCheckMs = 9000
 const centerPopupChance = 0.5
 // Chance that a centre popup shows up three times bigger than usual.
 const hugePopupChance = 0.15
+// Clicking a popup anywhere but its X spawns another one somewhere random,
+// a bit bigger than the one clicked, up to this many extra popups at once.
+const maxSpawnedPopups = 8
+const spawnScaleStep = 0.12
+const maxSpawnScale = 1.6
+
+type SpawnedPopup = { id: number; index: number; name: string; x: number; y: number; scale: number }
+
+let nextSpawnedPopupId = 1
 
 function randomPopupName() {
   return popupNames[Math.floor(Math.random() * popupNames.length)]
@@ -222,6 +231,7 @@ function Site() {
   const [locationStatus, setLocationStatus] = useState('alapértelmezett hely')
   const [popupTick, setPopupTick] = useState(0)
   const [dismissedPopups, setDismissedPopups] = useState<number[]>([])
+  const [spawnedPopups, setSpawnedPopups] = useState<SpawnedPopup[]>([])
   const [centerPopup, setCenterPopup] = useState<{
     index: number
     name: string
@@ -325,6 +335,26 @@ function Site() {
 
     return () => window.clearInterval(intervalId)
   }, [])
+
+  function spawnPopup(fromScale = 1) {
+    setSpawnedPopups((current) => {
+      if (current.length >= maxSpawnedPopups) {
+        return current
+      }
+
+      return [
+        ...current,
+        {
+          id: nextSpawnedPopupId++,
+          index: Math.floor(Math.random() * viralPopups.length),
+          name: randomPopupName(),
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          scale: Math.min(maxSpawnScale, fromScale + spawnScaleStep),
+        },
+      ]
+    })
+  }
 
   const enrichedProfiles = useMemo(
     () =>
@@ -581,11 +611,15 @@ function Site() {
             className={`virus-popup ${popup.tone}`}
             style={{ '--delay': `${index * 0.18}s`, '--shift': `${index * 18}px` } as CSSProperties}
             key={popup.appearance}
+            onClick={() => spawnPopup()}
           >
             <button
               type="button"
               aria-label="Bezárás"
-              onClick={() => setDismissedPopups((appearances) => [...appearances, popup.appearance])}
+              onClick={(event) => {
+                event.stopPropagation()
+                setDismissedPopups((appearances) => [...appearances, popup.appearance])
+              }}
             >
               ×
             </button>
@@ -595,23 +629,70 @@ function Site() {
         ))}
       </aside>
 
-      {centerPopup && (
+      {(centerPopup || spawnedPopups.length > 0) && (
         <div className="virus-center">
-          {/* x/y are percentages; the matching translate keeps the popup fully on screen. */}
-          <div
-            className={`virus-center-spot ${centerPopup.huge ? 'is-huge' : ''}`}
-            style={{
-              left: `${centerPopup.x}%`,
-              top: `${centerPopup.y}%`,
-              transform: `translate(-${centerPopup.x}%, -${centerPopup.y}%)`,
-            }}
-          >
-            <div className={`virus-popup is-center ${viralPopups[centerPopup.index].tone}`} role="alert">
-              <button type="button" aria-label="Bezárás" onClick={() => setCenterPopup(null)}>×</button>
-              <strong>{fillPopupName(viralPopups[centerPopup.index].title, centerPopup.name)}</strong>
-              <span>{viralPopups[centerPopup.index].text}</span>
+          {/* x/y are percentages; the matching translate keeps each popup fully on screen. */}
+          {centerPopup && (
+            <div
+              className={`virus-center-spot ${centerPopup.huge ? 'is-huge' : ''}`}
+              style={{
+                left: `${centerPopup.x}%`,
+                top: `${centerPopup.y}%`,
+                transform: `translate(-${centerPopup.x}%, -${centerPopup.y}%)`,
+              }}
+            >
+              <div
+                className={`virus-popup is-center ${viralPopups[centerPopup.index].tone}`}
+                role="alert"
+                onClick={() => spawnPopup()}
+              >
+                <button
+                  type="button"
+                  aria-label="Bezárás"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setCenterPopup(null)
+                  }}
+                >
+                  ×
+                </button>
+                <strong>{fillPopupName(viralPopups[centerPopup.index].title, centerPopup.name)}</strong>
+                <span>{viralPopups[centerPopup.index].text}</span>
+              </div>
             </div>
-          </div>
+          )}
+          {spawnedPopups.map((popup) => (
+            <div
+              className="virus-center-spot"
+              key={popup.id}
+              style={{
+                left: `${popup.x}%`,
+                top: `${popup.y}%`,
+                width: `min(${Math.round(460 * popup.scale)}px, 100%)`,
+                transform: `translate(-${popup.x}%, -${popup.y}%)`,
+                '--popup-scale': popup.scale,
+              } as CSSProperties}
+            >
+              <div
+                className={`virus-popup is-center ${viralPopups[popup.index].tone}`}
+                role="alert"
+                onClick={() => spawnPopup(popup.scale)}
+              >
+                <button
+                  type="button"
+                  aria-label="Bezárás"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setSpawnedPopups((current) => current.filter((item) => item.id !== popup.id))
+                  }}
+                >
+                  ×
+                </button>
+                <strong>{fillPopupName(viralPopups[popup.index].title, popup.name)}</strong>
+                <span>{viralPopups[popup.index].text}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

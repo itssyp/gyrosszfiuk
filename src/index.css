@@ -482,8 +482,10 @@ select:focus, input:focus { border-color: var(--wine); box-shadow: 0 0 0 3px rgb
   box-shadow: 12px 12px 0 rgb(0 0 0 / 45%), inset 0 22px 0 #e30038;
   animation: popupCenterIn .5s cubic-bezier(.2, 1.4, .35, 1) both, popupBuzz 2.5s .6s infinite;
 }
-.virus-popup.is-center strong { font-size: 26px; }
-.virus-popup.is-center span { font-size: 16px; }
+.virus-popup.is-center strong { font-size: calc(26px * var(--popup-scale, 1)); }
+.virus-popup.is-center span { font-size: calc(16px * var(--popup-scale, 1)); }
+.virus-popup { cursor: pointer; }
+.virus-popup button { cursor: pointer; }
 .virus-popup.is-center button { top: 1px; width: 30px; height: 30px; font-size: 22px; }
 
 /* The rare 3x popup; font sizes are capped so it still fits on a phone. */
