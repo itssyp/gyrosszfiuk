@@ -28,8 +28,8 @@ const storageKey = 'gyros-consent'
 
 function readConsent(): Consent {
   try {
-    const value = window.localStorage.getItem(storageKey)
-    return value === 'accepted' || value === 'declined' ? value : 'pending'
+    // The popup shows on every visit; only a ban is remembered between visits.
+    return window.localStorage.getItem(storageKey) === 'declined' ? 'declined' : 'pending'
   } catch {
     return 'pending'
   }
