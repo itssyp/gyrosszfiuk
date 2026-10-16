@@ -75,6 +75,13 @@ const viralPopups = [
   { title: '{name} gépel...', text: 'nagyon szaftos választ ír', tone: 'online' },
   { title: 'Akció lejár', text: '00:13 másodperc és kihűl', tone: 'hot' },
   { title: 'Engedélyezd a helyzeted', text: 'hogy a gyros találjon meg téged', tone: 'warning' },
+  { title: '{name} gólt lőtt', text: 'egyenesen a pitába, a VAR szerint is szabályos', tone: 'online' },
+  { title: 'Piros lap!', text: 'valaki csípős nélkül kérte a gyrost', tone: 'danger' },
+  { title: '¡Olé! {name} megérkezett', text: 'sombreróban hozza a dupla húst', tone: 'hot' },
+  { title: 'Les!', text: 'a hagyma túl korán futott be a pitába', tone: 'warning' },
+  { title: '{name} tizenegyest kért', text: 'tizenegy extra jalapeñót a gyrosba', tone: 'hot' },
+  { title: '{name} átigazolt', text: 'a tortilláktól a pitákhoz, 73 teve volt a vételár', tone: 'photo' },
+  { title: 'Hosszabbítás', text: '+5 perc, mire a szósz eléri a könyököd', tone: 'warning' },
 ]
 
 const maxVisiblePopups = 3
@@ -84,7 +91,7 @@ const centerPopupChance = 0.5
 const hugePopupChance = 0.15
 // Clicking a popup anywhere but its X spawns another one somewhere random,
 // a bit bigger than the one clicked, up to this many extra popups at once.
-const maxSpawnedPopups = 8
+const maxSpawnedPopups = 15
 const spawnScaleStep = 0.12
 const maxSpawnScale = 1.6
 
