@@ -62,7 +62,7 @@ const profiles: GyrosProfile[] = [
 ]
 
 // {name} in a popup title is swapped for a random gyros boy every time the popup appears.
-const popupNames = ['Ádi', 'Zalán', 'Tanár Úr', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész']
+const popupNames = ['Ádi', 'Zalán', 'Tanár Úr', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
 
 const viralPopups = [
   { title: '{name} elhívott egy mysteryboxra', text: 'hogy mi van benne? csak a pita tudja', tone: 'mystery' },

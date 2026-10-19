@@ -5,6 +5,8 @@ type Candidate = {
   name: string
   age: number
   image: string
+  // Where to anchor the photo in the square card, e.g. 'left center'.
+  imagePosition?: string
   tags: string[]
   attributes: string[]
   joke: string
@@ -68,6 +70,16 @@ const candidates: Candidate[] = [
     tags: ['gyroskard', 'megamenü'],
     attributes: ['50+ gyros egy A7V-n', 'heti 3 edzés', 'piaci érték: 73 teve', 'példakép: Polgár Jenő'],
     joke: 'Heti háromszor edz, hogy elbírja a gyroskardot. A piaci értéke 73 teve, de egy dupla húsos pitáért alkuképes.',
+  },
+  {
+    id: 'amerika',
+    name: 'Mr. Amerika',
+    age: 25,
+    image: '/jeloltek/mr-amerika.jpg',
+    imagePosition: 'left center',
+    tags: ['türkiz unikornis', 'kos-energia'],
+    attributes: ['ügyes kezek', '100% ügyfél-elégedettség', 'piaci érték: 95M €', 'példakép: Gyrosos Zalán'],
+    joke: 'Amerikát már annyiszor megjárta, hogy a gyrost is csak XXL-ben, dupla szósszal és egy vödör jéghideg kólával hajlandó elfogadni. Védekező középpályásként a gyrost is ő vezényli: Rodri nyugalmával tekeri, Busquets pontosságával passzolja tovább. Türkiz unikornisban dolgozik, és mivel kos, a hagymáról nincs vita. Habár a sört nem szereti, de ezen kívül 100% férfi.',
   },
 ]
 
@@ -137,7 +149,7 @@ function Voting() {
 
           return (
             <article className={`profile-card vote-card ${isMine ? 'is-mine' : ''}`} key={candidate.id}>
-              <div className="profile-image vote-image" style={{ backgroundImage: `url(${candidate.image})` }}>
+              <div className="profile-image vote-image" style={{ backgroundImage: `url(${candidate.image})`, backgroundPosition: candidate.imagePosition }}>
                 {isLeader && <span className="featured">👑 VEZET</span>}
                 <span className="distance-pill">⌖ {city}</span>
               </div>
