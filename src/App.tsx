@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import Featured from './Featured'
 import GyrosConsent from './GyrosConsent'
+import News from './News'
 import Order from './Order'
 import PostGyros from './PostGyros'
 import Restaurant from './Restaurant'
@@ -16,6 +17,8 @@ type Coordinates = {
 type GyrosProfile = {
   id: string
   name: string
+  // Newly signed gyros boy: gets a "Friss tag" pill on the home cards.
+  isNew?: boolean
   city: string
   district: string
   age: number
@@ -39,7 +42,7 @@ const profiles: GyrosProfile[] = [
     city: 'Balatonszemes',
     district: '',
     age: 22,
-    price: '1100 Ft',
+    price: '1 990 Ft',
     tags: ['marha', 'extra spicy'],
     attributes: ['extra meaty', 'extra fatty', 'home delivery', 'late night', 'csípős csomag'],
     image: '/1d1b7c24-ff5e-4087-bafd-34abe34d0116.jpg',
@@ -49,20 +52,34 @@ const profiles: GyrosProfile[] = [
   {
     id: 'zalan',
     name: 'Zalán',
-    city: 'Budapest',
-    district: 'XI. kerület',
+    city: 'Balatonszemes',
+    district: '',
     age: 29,
-    price: '2 290 Ft',
+    price: '1 990 Ft',
     tags: ['csirke', 'házi szósz'],
     attributes: ['extra szaftos', 'home delivery', 'XL pita', 'dupla hús', 'képet küld'],
     image: '/5eb7e080-08cd-4829-8577-faf0753e8c84.jpg',
     fresh: '3 perce',
-    coordinates: { lat: 47.4661, lon: 19.0408 },
+    coordinates: { lat: 46.8125, lon: 17.7660 },
+  },
+  {
+    id: 'tanba',
+    name: 'Tanbá',
+    isNew: true,
+    city: 'Velence',
+    district: '',
+    age: 40,
+    price: '1 100 Ft',
+    tags: ['késművész', 'bajusz-garancia'],
+    attributes: ['2x lock in', 'ex-étterem boss', 'mexikói hagymás', 'büfés kötény'],
+    image: '/jeloltek/tanba.jpg',
+    fresh: 'friss igazolás',
+    coordinates: { lat: 47.2386, lon: 18.6514 },
   },
 ]
 
 // {name} in a popup title is swapped for a random gyros boy every time the popup appears.
-const popupNames = ['Ádi', 'Zalán', 'Tanár Úr', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
+const popupNames = ['Ádi', 'Zalán', 'Tanbá', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
 
 const viralPopups = [
   { title: '{name} elhívott egy mysteryboxra', text: 'hogy mi van benne? csak a pita tudja', tone: 'mystery' },
@@ -128,7 +145,7 @@ function getPopupWindow(tick: number) {
 }
 const isUnderConstruction = import.meta.env.VITE_UNDER_CONSTRUCTION === 'true'
 
-type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order' | 'post' | 'restaurant'
+type Tab = 'home' | 'swipe' | 'vote' | 'featured' | 'order' | 'post' | 'restaurant' | 'news'
 
 const orderHashPrefix = '#rendeles/'
 
@@ -143,6 +160,7 @@ function getTabFromHash(hash: string): Tab {
     '#kiemelt': 'featured',
     '#feladas': 'post',
     '#etterem': 'restaurant',
+    '#hirek': 'news',
   }
 
   return tabs[hash] ?? 'home'
@@ -153,6 +171,7 @@ const navLinks: { tab: Tab; href: string; label: string }[] = [
   { tab: 'featured', href: '#kiemelt', label: 'Kiemeltek' },
   { tab: 'swipe', href: '#swipe', label: 'Swipe 🔥' },
   { tab: 'vote', href: '#szavazas', label: 'Szavazás 🗳️' },
+  { tab: 'news', href: '#hirek', label: 'Gyros hírek 📰' },
   { tab: 'restaurant', href: '#etterem', label: 'Éttermek' },
 ]
 
@@ -190,16 +209,38 @@ function formatDistance(distance: number) {
   return `${distance.toFixed(distance < 10 ? 1 : 0)} km`
 }
 
+// Each gyros boy's own line for: under 1 km, under 10 km, further away.
+const closenessLines: Record<string, [string, string, string]> = {
+  adi: [
+    'Ádi gyalog is veszélyesen közel van.',
+    'Ádi már bemelegítette a csípős szószt, pár perc és ott van.',
+    'Ádi messze van, de a csípős illata már megelőzte.',
+  ],
+  zalan: [
+    'Zalán olyan közel van, hogy hallod, ahogy kinyit egy Bakot.',
+    'Zalán már úton van, a képet előre elküldte.',
+    'Zalán messzebb van, de egy XL pitáért a Balatont is átússza.',
+  ],
+  tanba: [
+    'Tanbá a sarkon van, a bajusza már be is fordult.',
+    'Tanbá kétszer mondta, hogy lock in, és már úton is van.',
+    'Tanbá messzebb van, de a szósz már úton van.',
+  ],
+}
+
 function getCloseness(profile: GyrosProfile, distance: number) {
-  if (distance < 1) {
-    return `${profile.name} gyalog is veszélyesen közel van.`
+  const band = distance < 1 ? 0 : distance < 10 ? 1 : 2
+  const lines = closenessLines[profile.id]
+
+  if (lines) {
+    return lines[band]
   }
 
-  if (distance < 10) {
-    return `${profile.name} még bőven a forró zónában van.`
-  }
-
-  return `${profile.name} messzebb van, de a szósz már úton van.`
+  return [
+    `${profile.name} gyalog is veszélyesen közel van.`,
+    `${profile.name} még bőven a forró zónában van.`,
+    `${profile.name} messzebb van, de a szósz már úton van.`,
+  ][band]
 }
 
 function UnderConstruction() {
@@ -468,6 +509,10 @@ function Site() {
         <main>
           <Featured profiles={enrichedProfiles} onOrder={openOrder} />
         </main>
+      ) : activeTab === 'news' ? (
+        <main>
+          <News />
+        </main>
       ) : activeTab === 'restaurant' ? (
         <main>
           <Restaurant />
@@ -510,7 +555,7 @@ function Site() {
               <select value={city} onChange={(event) => setCity(event.target.value)}>
                 <option>Minden város</option>
                 <option>Balatonszemes</option>
-                <option>Budapest</option>
+                <option>Velence</option>
               </select>
             </label>
             <label>
@@ -545,7 +590,7 @@ function Site() {
           <div className="section-heading">
             <div>
               <p className="kicker dark">VÍRUSOSAN KIEMELT KÍNÁLAT</p>
-              <h2>Csak a két gyros fiú</h2>
+              <h2>Csak a három gyros fiú</h2>
             </div>
             <p><strong>{visibleProfiles.length}</strong> szaftos találat innen: {locationLabel}</p>
           </div>
@@ -561,6 +606,7 @@ function Site() {
                 >
                   <span className="featured">KIEMELT</span>
                   <span className="online"><i /> Nyitva</span>
+                  {profile.isNew && <span className="online fresh-pill"><i /> Friss tag</span>}
                   <span className="distance-pill">Tőled {profile.distanceLabel}</span>
                   <button className="heart" aria-label={`${profile.name} mentése`}>♡</button>
                 </div>

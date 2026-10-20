@@ -10,6 +10,9 @@ type FeaturedProfile = {
 }
 
 type HallOfFame = {
+  badge: string
+  // Small status pill on the photo, like "Nyitva" on the home cards.
+  pill?: string
   rank: string
   quote: string
   awards: string[]
@@ -18,31 +21,49 @@ type HallOfFame = {
 
 const hallOfFame: Record<string, HallOfFame> = {
   adi: {
+    badge: '🏆 LEGENDA',
     rank: 'ALAPÍTÓ · CSÍPŐS RÉSZLEG',
     quote: 'A csípős nem opció, hanem életérzés.',
     awards: [
       'Balatonszemes legcsípősebb embere',
       'Éjféli pitakiszállítás bajnoka',
-      'A hónap marhája (zsinórban 3x)',
+      'Ha műszak közben megzavarják, a feje habanero-pirosra vált, de két tömő után újra szelíd, mint az enyhe szósz',
     ],
     stats: [
       { label: 'Csípősség', value: 100, note: 'a tűzoltók már ismerik' },
-      { label: 'Szaftosság', value: 94, note: 'a szalvéta kevés' },
+      { label: 'Türelem műszak közben', value: 12, note: 'két tömőért visszatölthető' },
       { label: 'Pontosság', value: 23, note: 'valahol a 7-es úton jár' },
     ],
   },
   zalan: {
-    rank: 'ALAPÍTÓ · SZÓSZ RÉSZLEG',
+    badge: '🏆 LEGENDA',
+    rank: 'ALAPÍTÓ · SZÓSZ RÉSZLEG · BAK FŐNI',
     quote: 'A házi szósz receptje titok. Még előttem is.',
     awards: [
-      'A XI. kerület legnagyobb pitája',
-      'Házi szósz szabadalom (folyamatban)',
-      'Képküldés aranyérem',
+      'Becenév: Bak Főni (a hűtőben a Bakok vigyázzban állnak, ha belép)',
+      'A Balaton-part legnagyobb pitája',
+      'Ő pecsételte le Tanbá szerződését',
     ],
     stats: [
       { label: 'Pitaméret', value: 100, note: 'XL, nem alkuképes' },
       { label: 'Szósz mennyiség', value: 97, note: 'két kézzel kell fogni' },
       { label: 'Válaszidő', value: 9, note: 'a kép még mindig tölt' },
+    ],
+  },
+  tanba: {
+    badge: '✍️ ÚJ IGAZOLÁS',
+    pill: 'Friss tag',
+    rank: 'FRISS IGAZOLÁS · KÉS RÉSZLEG',
+    quote: 'Kétszer mondom ki, hogy „lock in”, és a gyroskés magától forog.',
+    awards: [
+      'Ex-étterem boss (nem sokan merték kérdezni)',
+      'Mexikóiul is megkérdezi: hagyma, csípős mehet?',
+      'Bajusz: 40 év tapasztalat, a többi még fiatal',
+    ],
+    stats: [
+      { label: 'Késtechnika', value: 99, note: 'a hagyma már előre sír' },
+      { label: 'Bajusz', value: 100, note: 'pár évtizeddel előrébb jár' },
+      { label: 'Büfé-hűség', value: 88, note: 'a kötényt már le sem veszi' },
     ],
   },
 }
@@ -70,7 +91,8 @@ function Featured({ profiles, onOrder }: FeaturedProps) {
           return (
             <article className="featured-card" key={profile.id}>
               <div className="featured-photo" style={{ backgroundImage: `url(${profile.image})` }}>
-                <span className="featured">🏆 LEGENDA</span>
+                <span className="featured">{fame?.badge ?? '🏆 LEGENDA'}</span>
+                {fame?.pill && <span className="online"><i /> {fame.pill}</span>}
                 <span className="distance-pill">Tőled {profile.distanceLabel}</span>
               </div>
               <div className="featured-body">

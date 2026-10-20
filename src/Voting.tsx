@@ -18,15 +18,6 @@ const city = 'Velence'
 
 const candidates: Candidate[] = [
   {
-    id: 'tanar',
-    name: 'Tanár Úr',
-    age: 40,
-    image: '/jeloltek/tanar-ur.jpg',
-    tags: ['késművész', 'lila szósz'],
-    attributes: ['2x lock in', 'ex-étterem boss', 'mexikói hagymás', 'hajrá Újpest'],
-    joke: 'Kétszer mondja ki, hogy „lock in”, és a gyroskés már magától forog. A hagymát mexikóiul kérdezi meg, a csípőset úgyis ráteszi. Ne a bajuszból ítéld meg: fiatalabb, mint gondolnád, csak a bajsza ment előre pár évtizeddel.',
-  },
-  {
     id: 'bozsi',
     name: 'Bözsi',
     age: 20,
