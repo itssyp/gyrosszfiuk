@@ -10,6 +10,9 @@ type Post =
       body: string
       image?: string
       imagePosition?: string
+      // document: show the whole image (e.g. a scanned letter) instead of a 16:9 crop.
+      imageDocument?: boolean
+      imageAlt?: string
       link?: { href: string; label: string }
       reactions: number
     }
@@ -66,6 +69,18 @@ const posts: Post[] = [
     ],
     link: { href: '#kiemelt', label: 'Tanbá a Kiemeltek között' },
     reactions: 312,
+  },
+  {
+    id: 'lala',
+    kind: 'text',
+    tag: 'MÉDIA',
+    time: 'ma, 13:45',
+    title: '📸 Kérvény érkezett: Lala lenne a Birodalom hivatalos fotósa',
+    body: 'Bak Főni asztalán landolt az év legkomolyabb beadványa (ügyszám: GYROS-FOTO-MVP-2026). Lala, a magát MVP-nek kikiáltó médiás szerint gyorsabban exponál, mint ahogy a szaft lecsöppen, bal kézzel élesít a lila hagymára, jobbal közben már nyújtja a csípőst, és könnyek nélkül fotózza végig a hagymavágást. A „Főni bírálata” rovatban egyelőre egyik kocka sincs kipipálva: bennfentesek szerint Főni bontott egy Bakot, és erősen a „Tesztfotózás!” felé hajlik. A fotós addig is gyakorol, a nyárs pedig állítólag már most büszkébben forog.',
+    image: '/hirek/lala-kerveny.jpg',
+    imageDocument: true,
+    imageAlt: 'Lala kérvénye a gyrosszfiuk.hu hivatalos médiapartnere és fotósa posztra',
+    reactions: 187,
   },
   {
     id: 'megamenu',
@@ -212,7 +227,10 @@ function News() {
 
               {post.kind === 'text' && (
                 <>
-                  {post.image && (
+                  {post.image && post.imageDocument && (
+                    <img className="news-document" src={post.image} alt={post.imageAlt ?? ''} loading="lazy" />
+                  )}
+                  {post.image && !post.imageDocument && (
                     <div
                       className="news-image"
                       style={{ backgroundImage: `url(${post.image})`, backgroundPosition: post.imagePosition }}

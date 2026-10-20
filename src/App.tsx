@@ -84,6 +84,7 @@ const popupNames = ['Ádi', 'Zalán', 'Tanbá', 'Bözsi', 'Csőke', 'Rabó', 'Sz
 const viralPopups = [
   { title: '{name} elhívott egy mysteryboxra', text: 'hogy mi van benne? csak a pita tudja', tone: 'mystery' },
   { title: '{name} üzenetet küldött', text: '“jössz ma gyrosra?”', tone: 'hot' },
+  { title: '{name} videóhívást indított', text: 'Össznépi chat: megint csörög 📞', tone: 'online' },
   { title: '{name} képet küldött', text: '1 új szaftos melléklet', tone: 'photo' },
   { title: '{name} aktív', text: 'most nézte meg a profilod', tone: 'online' },
   { title: 'Gyros riasztás', text: '2 fiú van a közeledben', tone: 'warning' },

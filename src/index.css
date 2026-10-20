@@ -940,6 +940,7 @@ footer > div { display: flex; gap: 22px; margin-left: auto; font-size: 11px; }
 .news-card h3 { margin: 0 0 12px; font-family: 'Oswald', sans-serif; font-size: 24px; line-height: 1.15; text-transform: uppercase; }
 .news-card > p { margin: 0; color: #4d3531; font-size: 15px; line-height: 1.6; }
 .news-image { aspect-ratio: 16 / 9; margin: 0 -24px 14px; background-size: cover; background-position: center; }
+.news-document { display: block; width: min(460px, 100%); margin: 0 auto 14px; border: 1px solid #e1d7d0; border-radius: 3px; box-shadow: 0 8px 20px rgb(67 43 34 / 14%); transform: rotate(-1deg); }
 .news-poll { display: grid; gap: 10px; }
 .news-poll-row > div:first-child { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; }
 .news-poll-row span { color: var(--wine); font-family: 'Oswald', sans-serif; font-weight: 700; }
