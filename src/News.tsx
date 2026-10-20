@@ -73,7 +73,7 @@ const posts: Post[] = [
     tag: 'ÜZEMANYAG',
     time: 'ma, 13:10',
     title: '⛽ Hivatalos: a gyros fiúk benzinje a MEGAMENÜ',
-    body: 'Mérnökeink kimérték: a gyros fiúk nem kalóriából, hanem MEGAMENÜből működnek. A receptet a csapat ügyvédei széfbe zárták, annyit elárulhatunk, hogy az egyik összetevő kőkemény, mint egy bánya, a másik átlátszó, de egészen biztosan nem víz. Hivatalos fogyasztás: 2,5 liter / 100 pita. Soltész már a GT 2025-ön is ezzel tankolt, a forrásaink szerint cumisüvegből.',
+    body: 'Mérnökeink kimérték: a gyros fiúk nem kalóriából, hanem MEGAMENÜből működnek. A receptet a csapat ügyvédei széfbe zárták, annyit elárulhatunk, hogy az egyik összetevő kőkemény, mint egy bánya, a másik átlátszó, de egészen biztosan nem víz. Kiszerelés: 2 liter, egyetlen palackban. Hogy a titkos összetevő beférjen, előtte valakinek önfeláldozóan „helyet kell csinálnia” neki, ezt a csapat legbátrabb tagja vállalja. Soltész már a GT 2025-ön is ezzel tankolt, a forrásaink szerint cumisüvegből.',
     reactions: 421,
   },
   {
