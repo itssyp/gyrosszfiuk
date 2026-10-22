@@ -21,7 +21,7 @@ type GyrosProfile = {
   isNew?: boolean
   city: string
   district: string
-  // A menu of several boys can show e.g. "21 + 20".
+  // A menu of several boys can show e.g. "átlag 20,5".
   age: number | string
   price: string
   tags: string[]
@@ -83,7 +83,7 @@ const profiles: GyrosProfile[] = [
     isNew: true,
     city: 'Velence',
     district: '',
-    age: '21 + 20',
+    age: 'átlag 20,5',
     price: '1 500 Ft',
     tags: ['2 db Balázs', 'választható szósz'],
     attributes: ['csak együtt kapható', 'kórusban kérdez', 'megkülönböztethetetlen', '-10%, de mihez képest?'],
