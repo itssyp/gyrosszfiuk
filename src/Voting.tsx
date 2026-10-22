@@ -18,24 +18,6 @@ const city = 'Velence'
 
 const candidates: Candidate[] = [
   {
-    id: 'bozsi',
-    name: 'Bözsi',
-    age: 20,
-    image: '/jeloltek/bozsi.jpg',
-    tags: ['tiki-taka pita', 'zöld mamusz'],
-    attributes: ['44,5-ös láb', 'Villa-gyors kiszállítás', 'Iniesta-passz minőség', 'piaci érték: 100M €'],
-    joke: 'Úgy adja át a gyrost, mint Iniesta a labdát: pontosan, és mindig a csípős szósz felé. Rick és Morty mamuszban szállít, ezért nem hallod, amikor odaér.',
-  },
-  {
-    id: 'csoke',
-    name: 'Csőke',
-    age: 21,
-    image: '/jeloltek/csoke.jpg',
-    tags: ['habtest', 'melegen tartó'],
-    attributes: ['gólyatábor veterán', 'Y que fue lock in', 'piaci érték: 6 967 €', 'Harvard-diploma (állítólag)'],
-    joke: 'A habtestével tartja melegen a gyrost, a többi ötletét nem spoilerezi. A diplomáján ugyan Jordan Thompson neve áll, de a pitát ő tekeri.',
-  },
-  {
     id: 'rabo',
     name: 'Rabó',
     age: 19,

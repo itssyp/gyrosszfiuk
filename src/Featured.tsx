@@ -1,7 +1,7 @@
 type FeaturedProfile = {
   id: string
   name: string
-  age: number
+  age: number | string
   city: string
   district: string
   price: string
@@ -64,6 +64,22 @@ const hallOfFame: Record<string, HallOfFame> = {
       { label: 'Késtechnika', value: 99, note: 'a hagyma már előre sír' },
       { label: 'Bajusz', value: 100, note: 'pár évtizeddel előrébb jár' },
       { label: 'Büfé-hűség', value: 88, note: 'a kötényt már le sem veszi' },
+    ],
+  },
+  balazs: {
+    badge: '✍️ ÚJ IGAZOLÁS',
+    pill: 'Friss tag',
+    rank: 'FRISS IGAZOLÁS · MENÜ RÉSZLEG',
+    quote: 'Külön nem rendelhetők, külön nem szállíthatók, és külön szomorkodni sem jogosultak.',
+    awards: [
+      'Az első gyros fiúk, akiket csak menüben lehet kérni',
+      'Ha valaki „Balázs!”-t kiált, ketten fordulnak meg',
+      'Hogy melyik melyik? Ők sem tudják',
+    ],
+    stats: [
+      { label: 'Összetartás', value: 100, note: 'szerződésben rögzítve' },
+      { label: 'Megkülönböztethetőség', value: 4, note: 'a sorrend tetszőleges' },
+      { label: 'Kórusban kérdezés', value: 97, note: '„hagyma, csípős mehet?”' },
     ],
   },
 }

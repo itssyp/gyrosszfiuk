@@ -31,7 +31,7 @@ type Post =
   | { id: string; kind: 'poll'; tag: string; time: string; title: string; reactions: number }
   | { id: string; kind: 'stats'; tag: string; time: string; title: string; reactions: number }
 
-const pollCandidates = ['Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
+const pollCandidates = ['Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
 
 const weeklyStats = [
   { value: '1 284', label: 'pita feltekerve' },
@@ -41,6 +41,7 @@ const weeklyStats = [
 ]
 
 const tickerItems = [
+  'BREAKING: a Balázs menü aláírt (kétszer)',
   'BREAKING: Tanbá aláírt',
   'A Bueno továbbra is ice cold 🥶',
   'Mr. Amerika piaci értéke 95M €',
@@ -50,6 +51,26 @@ const tickerItems = [
 ]
 
 const posts: Post[] = [
+  {
+    id: 'balazs',
+    kind: 'tweet',
+    tag: 'ÁTIGAZOLÁS',
+    time: 'ma, 15:30',
+    title: '🚨🥙 BREAKING: A Balázs menü a gyrosszfiuk.hu Kiemeltjeihez igazol!',
+    lines: [
+      '✍️ A „Hivatalos és Visszavonhatatlan Menüszerződés” aláírva, kétszer. Az alapítók pecsétje a helyén, a tintája csípős szósz.',
+      '🍽️ Tartalom: 2 db Balázs, választható szósz. A sorrend tetszőleges, úgysem derül ki.',
+      '💰 Ár: 1 500 Ft. A menü 10%-kal olcsóbb, hogy mihez képest, azt senki sem tudja.',
+      '🔁 Mostantól csak együtt rendelhetők: aki az egyiket kéri, a másikat is megkapja.',
+      '🗳️ A szavazásból visszaléptek: egymásra szavaztak, és ez döntetlen lett.',
+    ],
+    images: [
+      { src: '/jeloltek/balazs-menu.jpg', alt: 'A Balázs menü büfés kötényben' },
+      { src: '/jeloltek/balazs-szerzodes.jpg', alt: 'A Balázs menü aláírt menüszerződése', document: true },
+    ],
+    link: { href: '#kiemelt', label: 'A Balázs menü a Kiemeltek között' },
+    reactions: 389,
+  },
   {
     id: 'tanba',
     kind: 'tweet',

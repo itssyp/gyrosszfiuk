@@ -21,7 +21,8 @@ type GyrosProfile = {
   isNew?: boolean
   city: string
   district: string
-  age: number
+  // A menu of several boys can show e.g. "21 + 20".
+  age: number | string
   price: string
   tags: string[]
   attributes: string[]
@@ -76,10 +77,32 @@ const profiles: GyrosProfile[] = [
     fresh: 'friss igazolás',
     coordinates: { lat: 47.2386, lon: 18.6514 },
   },
+  {
+    id: 'balazs',
+    name: 'Balázs menü',
+    isNew: true,
+    city: 'Velence',
+    district: '',
+    age: '21 + 20',
+    price: '1 500 Ft',
+    tags: ['2 db Balázs', 'választható szósz'],
+    attributes: ['csak együtt kapható', 'kórusban kérdez', 'megkülönböztethetetlen', '-10%, de mihez képest?'],
+    image: '/jeloltek/balazs-menu.jpg',
+    fresh: 'friss igazolás',
+    coordinates: { lat: 47.2415, lon: 18.6420 },
+  },
 ]
 
+// On the Swipe tab the Balázs menü shows up as two cards that must be decided together.
+const swipeSplits: Record<string, { name: string; age: number; image: string }[]> = {
+  balazs: [
+    { name: 'Baloldali Balázs', age: 21, image: '/jeloltek/balazs-bal.jpg' },
+    { name: 'Jobboldali Balázs', age: 20, image: '/jeloltek/balazs-jobb.jpg' },
+  ],
+}
+
 // {name} in a popup title is swapped for a random gyros boy every time the popup appears.
-const popupNames = ['Ádi', 'Zalán', 'Tanbá', 'Bözsi', 'Csőke', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
+const popupNames = ['Ádi', 'Zalán', 'Tanbá', 'Balázs', 'Rabó', 'Széwald', 'Soltész', 'Mr. Amerika']
 
 const viralPopups = [
   { title: '{name} elhívott egy mysteryboxra', text: 'hogy mi van benne? csak a pita tudja', tone: 'mystery' },
@@ -226,6 +249,11 @@ const closenessLines: Record<string, [string, string, string]> = {
     'Tanbá a sarkon van, a bajusza már be is fordult.',
     'Tanbá kétszer mondta, hogy lock in, és már úton is van.',
     'Tanbá messzebb van, de a szósz már úton van.',
+  ],
+  balazs: [
+    'A Balázsok olyan közel vannak, hogy már azon vitatkoznak, melyikük csöngessen.',
+    'A Balázsok úton vannak, kéz a kézben, mert külön nem közlekedhetnek.',
+    'A Balázsok messze vannak, de kettesével kétszer olyan gyorsan érnek oda.',
   ],
 }
 
@@ -500,7 +528,13 @@ function Site() {
 
       {activeTab === 'swipe' ? (
         <main>
-          <SwipeDeck profiles={enrichedProfiles} />
+          <SwipeDeck
+            profiles={enrichedProfiles.flatMap((profile) =>
+              swipeSplits[profile.id]
+                ? swipeSplits[profile.id].map((part) => ({ ...profile, ...part, group: profile.id }))
+                : [profile],
+            )}
+          />
         </main>
       ) : activeTab === 'vote' ? (
         <main>
@@ -591,7 +625,7 @@ function Site() {
           <div className="section-heading">
             <div>
               <p className="kicker dark">VÍRUSOSAN KIEMELT KÍNÁLAT</p>
-              <h2>Csak a három gyros fiú</h2>
+              <h2>Csak a három gyros fiú és egy Balázs menü</h2>
             </div>
             <p><strong>{visibleProfiles.length}</strong> szaftos találat innen: {locationLabel}</p>
           </div>

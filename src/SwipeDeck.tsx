@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 
 export type SwipeProfile = {
   name: string
-  age: number
+  age: number | string
+  // Cards with the same group must get the same decision (the Balázs menü).
+  group?: string
   city: string
   district: string
   price: string
@@ -27,14 +29,30 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
   const [isDragging, setIsDragging] = useState(false)
   const [leaving, setLeaving] = useState<Decision | null>(null)
   const [liked, setLiked] = useState<string[]>([])
+  const [groupChoices, setGroupChoices] = useState<Record<string, { decision: Decision; index: number; name: string }>>({})
+  const [pairError, setPairError] = useState<string | null>(null)
   const dragStart = useRef<{ x: number; y: number } | null>(null)
 
   const current = profiles[index]
   const next = profiles[index + 1]
 
   function decide(decision: Decision) {
-    if (!current || leaving) {
+    if (!current || leaving || pairError) {
       return
+    }
+
+    if (current.group) {
+      const earlier = groupChoices[current.group]
+
+      if (earlier && earlier.decision !== decision) {
+        setDrag({ x: 0, y: 0 })
+        setPairError(current.group)
+        return
+      }
+
+      if (!earlier) {
+        setGroupChoices((choices) => ({ ...choices, [current.group!]: { decision, index, name: current.name } }))
+      }
     }
 
     setLeaving(decision)
@@ -53,7 +71,27 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
   function restart() {
     setIndex(0)
     setLiked([])
+    setGroupChoices({})
     setDrag({ x: 0, y: 0 })
+  }
+
+  // Back to the first card of the pair, and forget the earlier half-decision.
+  function closePairError() {
+    if (!pairError) {
+      return
+    }
+
+    const earlier = groupChoices[pairError]
+    if (earlier) {
+      setIndex(earlier.index)
+      setLiked((names) => names.filter((name) => name !== earlier.name))
+    }
+    setGroupChoices((choices) => {
+      const rest = { ...choices }
+      delete rest[pairError]
+      return rest
+    })
+    setPairError(null)
   }
 
   useEffect(() => {
@@ -179,6 +217,22 @@ function SwipeDeck({ profiles }: { profiles: SwipeProfile[] }) {
         </div>
       )}
       <p className="swipe-hint">Húzd a kártyát, vagy használd a ← → nyilakat.</p>
+
+      {pairError && (
+        <div className="consent-backdrop">
+          <section className="consent-dialog reject-dialog" role="alertdialog" aria-modal="true" aria-labelledby="pair-error-title">
+            <span className="reject-emoji" aria-hidden="true">👬</span>
+            <h2 id="pair-error-title">Hiba: a Balázsok csak együtt járnak</h2>
+            <p>
+              Az egyik Balázst kérnéd, a másikat nem? A menüszerződés 1. pontja szerint ez nem lehetséges:
+              külön nem rendelhetők, külön nem szállíthatók. Kezdjük újra a Balázsokat.
+            </p>
+            <div className="consent-actions">
+              <button type="button" className="search-button" onClick={closePairError}>Értem, újra döntök</button>
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   )
 }
@@ -197,7 +251,7 @@ type SwipeCardProps = {
 function SwipeCard({ profile, children, ...cardProps }: SwipeCardProps) {
   return (
     <div {...cardProps}>
-      <div className="swipe-photo" style={{ backgroundImage: `url(${profile.image})` }}>
+      <div className="swipe-photo" style={{ backgroundImage: `url(${profile.image})`, backgroundPosition: profile.group ? 'center 25%' : undefined }}>
         {children}
         <span className="distance-pill">Tőled {profile.distanceLabel}</span>
       </div>
