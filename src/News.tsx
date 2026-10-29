@@ -41,6 +41,7 @@ const weeklyStats = [
 ]
 
 const tickerItems = [
+  'HIVATALOS: Lala a Birodalom fotósa, a pecsét a helyén 📸',
   'BREAKING: a Balázs menü aláírt (kétszer)',
   'BREAKING: Tanbá aláírt',
   'A Bueno továbbra is ice cold 🥶',
@@ -51,6 +52,18 @@ const tickerItems = [
 ]
 
 const posts: Post[] = [
+  {
+    id: 'lala-elfogadva',
+    kind: 'text',
+    tag: 'MÉDIA',
+    time: 'ma, 16:05',
+    title: '✅ Lepecsételve: Lala a Birodalom hivatalos fotósa!',
+    body: 'Lezárult a GYROS-FOTO-MVP-2026 ügy. Az alapítók bontottak egy Bakot, egy csípős szószba mártott tollal beikszelték a „JÓVÁHAGYVA!” rovatot, és ráütötték a kérvényre a gyrosszfiuk.hu pecsétjét. Tesztfotózás nem lesz, mert Főni szerint aki ilyen kérvényt ír, az fotózni is tud. Lala, a magát MVP-nek kikiáltó médiás így mostantól hivatalosan is MVP, legalábbis a saját bemutatkozásában. Első megbízás: lefotózni a Balázs menüt úgy, hogy végre kiderüljön, melyik Balázs melyik. Juttatás: a kérvény szerint azonnal jár a gyros, a szerkesztőség szerint csak csípőssel. A pecsétet tilos megnyalni.',
+    image: '/hirek/lala-elfogadva.jpg',
+    imageDocument: true,
+    imageAlt: 'Lala kérvénye a gyrosszfiuk.hu alapítóinak pecsétjével és bejelölt „JÓVÁHAGYVA!” rovattal',
+    reactions: 241,
+  },
   {
     id: 'balazs',
     kind: 'tweet',
